@@ -23,8 +23,7 @@ describe 'ansi to html', () ->
 
 		it 'renders foreground colors', (done) ->
 			text = "colors: \x1b[30mblack\x1b[37mwhite"
-			result = 'colors: <span style="color:#000">black<span style="color:' +
-				'#AAA">white</span></span>'
+			result = 'colors: <span class="ansi30">black<span class="ansi37">white</span></span>'
 			test(text, result, done)
 
 		it 'renders light foreground colors', (done) ->
@@ -72,8 +71,7 @@ describe 'ansi to html', () ->
 
 		it 'handles multiple resets', (done) ->
 			text = 'normal, \x1b[1mbold, \x1b[3munderline, \x1b[31mred\x1b[0m, normal'
-			result = 'normal, <b>bold, <u>underline, <span style="color:' +
-				'#A00">red</span></u></b>, normal'
+			result = 'normal, <b>bold, <u>underline, <span class="ansi31">red</span></u></b>, normal'
 			test(text, result, done)
 
 		it 'handles resets with implicit 0', (done) ->
@@ -83,13 +81,13 @@ describe 'ansi to html', () ->
 
 		it 'renders multi-attribute sequences', (done) ->
 			text = 'normal, \x1b[1;3;31mbold, underline, and red\x1b[0m, normal'
-			result = 'normal, <b><u><span style="color:#A00">bold, underline,' +
+			result = 'normal, <b><u><span class="ansi31">bold, underline,' +
 				' and red</span></u></b>, normal'
 			test(text, result, done)
 
 		it 'renders multi-attribute sequences with a semi-colon', (done) ->
 			text = 'normal, \x1b[1;3;31;mbold, underline, and red\x1b[0m, normal'
-			result = 'normal, <b><u><span style="color:#A00">bold, underline, ' +
+			result = 'normal, <b><u><span class="ansi31">bold, underline, ' +
 				'and red</span></u></b>, normal'
 			test(text, result, done)
 
@@ -105,7 +103,7 @@ describe 'ansi to html', () ->
 
 		it 'handles resetting to default foreground color', (done) ->
 			text = '\x1b[30mblack\x1b[39mdefault'
-			result = '<span style="color:#000">black<span style="color:#FFF">' +
+			result = '<span class="ansi30">black<span style="color:#FFF">' +
 				'default</span></span>'
 			test(text, result, done)
 
@@ -123,8 +121,8 @@ describe 'ansi to html', () ->
 		it 'renders two escape sequences in sequence', (done) ->
 			text = 'months remaining\x1b[1;31mtimes\x1b[m\x1b[1;32mmultiplied' +
 				' by\x1b[m $10'
-			result = 'months remaining<b><span style="color:#A00">times</span>' +
-				   '</b><b><span style="color:#0A0">multiplied by</span></b> $10'
+			result = 'months remaining<b><span class="ansi31">times</span>' +
+				   '</b><b><span class="ansi32">multiplied by</span></b> $10'
 			test(text, result, done)
 
 		it 'drops EL code with no parameter', (done) ->
@@ -151,7 +149,7 @@ describe 'ansi to html', () ->
 
 		it 'escapes XML entities', (done) ->
 			text = 'normal, \x1b[1;3;31;mbold, <underline>, and red\x1b[0m, normal'
-			result = 'normal, <b><u><span style="color:#A00">bold, &lt;underline' +
+			result = 'normal, <b><u><span class="ansi31">bold, &lt;underline' +
 				'&gt;, and red</span></u></b>, normal'
 			test(text, result, done, escapeXML: true)
 
@@ -166,21 +164,18 @@ describe 'ansi to html', () ->
 
 		it 'persists styles between toHtml() invocations', (done) ->
 			text = ['\x1b[31mred', 'also red']
-			result = '<span style="color:#A00">red</span><span style="color:' +
-				'#A00">also red</span>'
+			result = '<span class="ansi31">red</span><span class="ansi31">also red</span>'
 			test(text, result, done, stream: true)
 
 		it 'persists styles between more than two toHtml() invocations', (done) ->
 			text = ['\x1b[31mred', 'also red', 'and red']
-			result = '<span style="color:#A00">red</span><span style="color:' +
-				'#A00">also red</span><span style="color:#A00">and red</span>'
+			result = '<span class="ansi31">red</span><span class="ansi31">also red</span><span class="ansi31">and red</span>'
 			test(text, result, done, stream: true)
 
 		it 'does not persist styles beyond their usefulness', (done) ->
 			text = ['\x1b[31mred', 'also red', '\x1b[30mblack', 'and black']
-			result = '<span style="color:#A00">red</span><span style="color:' +
-				'#A00">also red</span><span style="color:#A00"><span style="color:' +
-				'#000">black</span></span><span style="color:#000">and black</span>'
+			result = '<span class="ansi31">red</span><span class="ansi31">also red</span>' +
+				'<span class="ansi31"><span class="ansi30">black</span></span><span class="ansi30">and black</span>'
 			test(text, result, done, stream: true)
 
 		it 'removes all state when encountering a reset', (done) ->

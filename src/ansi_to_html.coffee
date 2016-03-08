@@ -127,7 +127,7 @@ class Filter
 		if code is 8 then callback @pushStyle('display:none')
 		if code is 9 then callback @pushTag('strike')
 		if code is 24 then callback @closeTag('u')
-		if 29 < code < 38 then callback @pushStyle("ef#{code - 30}")
+		if 29 < code < 38 then callback @pushClass("ansi#{code}")
 		if code is 39 then callback @pushStyle("color:#{@opts.fg}")
 		if 39 < code < 48 then callback @pushStyle("eb#{code - 40}")
 		if code is 49 then callback @pushStyle("background-color:#{@opts.bg}")
@@ -148,10 +148,10 @@ class Filter
 			'background-color'
 		else null
 
-	pushTag: (tag, style = '') ->
+	pushTag: (tag, style = '', cls = '') ->
 		style = STYLES[style] if style.length && style.indexOf(':') == -1
 		@stack.push tag
-		["<#{tag}", (" style=\"#{style}\"" if style), ">"].join('')
+		["<#{tag}", (" style=\"#{style}\"" if style), (" class=\"#{cls}\"" if cls), ">"].join('')
 
 	pushText: (text) ->
 		if @opts.escapeXML then entities.encodeXML(text)
@@ -159,6 +159,9 @@ class Filter
 
 	pushStyle: (style) ->
 		@pushTag "span", style
+
+	pushClass: (cls) ->
+		@pushTag "span", '', cls
 
 	closeTag: (style) ->
 		last = @stack.pop() if @stack.slice(-1)[0] is style
